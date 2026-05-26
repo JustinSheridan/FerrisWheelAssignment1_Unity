@@ -1,14 +1,9 @@
-// Hello world
-// Hello world
-// Hello world
 using UnityEngine;
 
 public class Spin_FerrisWheelBars : MonoBehaviour
 {
     // Make the fixed rate a public variable, allowing adjustment in the Inspector
     [SerializeField] private float spinRate = 90f; // Degrees per second
-    
-    // Keep this if you still need it for other logic, but it's no longer used for the rotation itself
     [SerializeField] private Vector3 pivotPoint = Vector3.zero;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
