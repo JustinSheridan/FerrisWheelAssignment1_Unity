@@ -2,32 +2,45 @@ using UnityEngine;
 
 public class Follow_Sun : MonoBehaviour
 {
-    // Make the fixed rate a public variable
     public float followSpeed = 10f;
-
-    // Add a public variable to set the Z position
     [SerializeField] private float fixedZPosition = 0f;
+    
+    // Curve defines the pulse shape (e.g., goes up and down)
+    [SerializeField] private AnimationCurve scaleCurve;
+    
+    // Speed of the pulse
+    [SerializeField] private float pulseSpeed = 2f;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        // Provide default cubic curve for pulsing if not assigned
+        if (scaleCurve == null)
+        {
+            // Example: Start at 0.5, go up to 1.5, back down to 0.5
+            scaleCurve = new AnimationCurve(
+                new Keyframe(0f, 0.5f),
+                new Keyframe(0.5f, 1.5f),
+                new Keyframe(1f, 0.5f)
+            );
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // Get the mouse position in screen space
+        // Follows the mouse
         Vector3 mouseScreenPos = Input.mousePosition;
-
-        // Convert screen position to world position
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(mouseScreenPos.x, mouseScreenPos.y, 0f));
-
-        // Move the object towards the mouse position at a fixed rate
-        // Create a target position using the mouse's X and Y, but the fixed Z
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(new Vector3(mouseScreenPos.x, mouseScreenPos.y, Camera.main.nearClipPlane));
         Vector3 targetPosition = new Vector3(mouseWorldPos.x, mouseWorldPos.y, fixedZPosition);
-
-        // Move towards the target position
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, followSpeed * Time.deltaTime);
+
+        // Pulsing the curve
+        // Mathf.PingPong creates a value that goes 0 -> 1 -> 0 -> 1 indefinitely
+        float pulseValue = Mathf.PingPong(Time.time * pulseSpeed, 1f);
+        
+        float scaleFactor = scaleCurve.Evaluate(pulseValue);
+        
+        // Scale with Lerp
+        Vector3 targetScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 10f);
     }
 }
